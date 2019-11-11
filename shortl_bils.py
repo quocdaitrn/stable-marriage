@@ -1,15 +1,12 @@
 from random import random, randint
-
-import numpy
-
 import utils
+import copy
+
 from gale_shapley import gs_find_optimal_and_shortlist
 from operations import break_marriage_man, break_marriage_woman
-import copy
 
 
 def shortl_bils():
-
     global sm1, sm2
 
     # define man preference list
@@ -22,7 +19,8 @@ def shortl_bils():
     women_shortlists_0 = copy.deepcopy(gs_man_result["opposite_sex_short_lists"])
     M0 = copy.deepcopy(gs_man_result["M"])
 
-    gs_woman_result = gs_find_optimal_and_shortlist(women_prefenrence_lists, men_prefenrence_lists, is_men_oriented=False)
+    gs_woman_result = gs_find_optimal_and_shortlist(women_prefenrence_lists, men_prefenrence_lists,
+                                                    is_men_oriented=False)
     women_shortlists_t = copy.deepcopy(gs_woman_result["short_lists"])
     men_shortlists_t = copy.deepcopy(gs_woman_result["opposite_sex_short_lists"])
     Mt = copy.deepcopy(gs_woman_result["M"])
@@ -66,7 +64,8 @@ def shortl_bils():
             for h in range(len(neighbor_left)):
                 M_temp_man = copy.deepcopy(neighbor_left[h])
                 for m in range(n):
-                    M_child = break_marriage_man(men_shortlists, women_shortlists, copy.deepcopy(M_temp_man), m, copy.deepcopy(Mt))
+                    M_child = break_marriage_man(men_shortlists, women_shortlists, copy.deepcopy(M_temp_man), m,
+                                                 copy.deepcopy(Mt))
                     if len(M_child) != 0:
                         neigbor_set.append(copy.deepcopy(M_child))
             if len(neigbor_set) != 0:
@@ -110,7 +109,8 @@ def shortl_bils():
             for h in range(len(neighbor_right)):
                 M_temp_woman = copy.deepcopy(neighbor_right[h])
                 for m in range(n):
-                    M_child = break_marriage_woman(women_shortlists, men_shortlists, copy.deepcopy(M_temp_woman), m, copy.deepcopy(M0))
+                    M_child = break_marriage_woman(women_shortlists, men_shortlists, copy.deepcopy(M_temp_woman), m,
+                                                   copy.deepcopy(M0))
                     if len(M_child) != 0:
                         neigbor_set.append(copy.deepcopy(M_child))
             if len(neigbor_set) != 0:
@@ -160,12 +160,4 @@ def shortl_bils():
     print(M_best)
 
 
-def break_marriage_list(start, end, neigbor_set, men_shortlists, women_shortlists, M, m, Mt):
-    for m in range(start, end + 1):
-        M_child = break_marriage_man(men_shortlists, women_shortlists, copy.deepcopy(M), m, copy.deepcopy(Mt))
-        if len(M_child) != 0:
-            neigbor_set.append(copy.deepcopy(M_child))
-
-
 shortl_bils()
-
