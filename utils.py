@@ -18,7 +18,7 @@ def matching_cost(men_short_lists: list, women_short_list: list, M: list):
         sw = sw + wr + 1
 
     # egalitarian cost
-    # fm = sm + sw;
+    # fm = sm + sw
 
     # sex - equal cost
     fm = abs(sm - sw)

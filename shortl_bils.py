@@ -1,3 +1,4 @@
+import time
 from random import random, randint
 import utils
 import copy
@@ -7,6 +8,8 @@ from operations import break_marriage_man, break_marriage_woman
 
 
 def shortl_bils():
+    start = time.time()
+
     global sm1, sm2
 
     # define man preference list
@@ -94,7 +97,7 @@ def shortl_bils():
                 # for next iteration
                 M_left = copy.deepcopy(M_next)
                 if len(index_arr) == 1:
-                    neighbor_left = copy.deepcopy(neigbor_set[index_arr[0]])
+                    neighbor_left[0] = copy.deepcopy(neigbor_set[index_arr[0]])
                 else:
                     if k > len(neigbor_set):
                         neighbor_left = copy.deepcopy(neigbor_set)
@@ -139,7 +142,7 @@ def shortl_bils():
                 # for next iteration
                 M_right = copy.deepcopy(M_next)
                 if len(index_arr) == 1:
-                    neighbor_right = copy.deepcopy(neigbor_set[index_arr[0]])
+                    neighbor_right[0] = copy.deepcopy(neigbor_set[index_arr[0]])
                 else:
                     if k > len(neigbor_set):
                         neighbor_right = copy.deepcopy(neigbor_set)
@@ -157,7 +160,9 @@ def shortl_bils():
 
         t = t + 1
 
-    print(M_best)
+    end = time.time()
+    print(f'Found M_best: {M_best} in {start - end}')
 
 
-shortl_bils()
+if __name__ == "__main__":
+    shortl_bils()

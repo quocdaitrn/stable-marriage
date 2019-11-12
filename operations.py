@@ -11,7 +11,8 @@ def break_marriage_man(men_short_lists: list, women_short_lists: list, M: list, 
     women_matching = [-1] * n
 
     # rank of men from women
-    for i in range(n):
+    for i in range(8):
+        # print(f'M_Man: {M}')
         women_matching[M[i]] = i
 
     # rank_w contains the position of the searching women
@@ -79,7 +80,8 @@ def break_marriage_woman(men_short_lists: list, women_short_lists: list, M: list
     women_M0 = [-1] * n
 
     # rank of men from women
-    for i in range(n):
+    for i in range(8):
+        # print(f'M_Woman: {M}')
         women_matching[M[i]] = i
         women_M0[M0[i]] = i
 

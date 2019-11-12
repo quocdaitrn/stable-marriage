@@ -65,7 +65,6 @@ class MyApp(object):
             for slave_return_data in self.work_queue.get_completed_work():
                 done, child, message = slave_return_data
                 if done:
-                    print('Master: slave finished is task and says "%s"' % message)
                     if (child is not None) and (len(child) != 0):
                         self.neigbor_set.append(copy.deepcopy(child))
 
@@ -87,18 +86,17 @@ class MySlave(Slave):
         name = MPI.Get_processor_name()
         men_shortlists, women_shortlists, M, m, Mt = data
 
-        print('  Slave %s rank %d executing task' % (name, rank))
         result = break_marriage_man(men_shortlists, women_shortlists, M, m, Mt)
 
         return True, result, 'I completed my task'
 
 
 def main():
+    start = time.time()
+
     name = MPI.Get_processor_name()
     rank = MPI.COMM_WORLD.Get_rank()
     size = MPI.COMM_WORLD.Get_size()
-
-    print('I am  %s rank %d (total %d)' % (name, rank, size))
 
     if rank == 0:  # Master
         global sm1, sm2
@@ -154,7 +152,6 @@ def main():
         t = 1
         app = MyApp(slaves=range(1, size))
         while True:
-            print(f'______________:{t}')
             # -------------------search forward---------------------
             if forward:
                 tasks = []
@@ -169,7 +166,6 @@ def main():
                 app.run(tasks)
                 # app.terminate_slaves()
                 neigbor_set = copy.deepcopy(app.get_neigbor_set())
-                print(f'neigbor_set: {neigbor_set}')
                 if len(neigbor_set) != 0:
                     # find the best neighbor matchings
                     neighbor_cost = []
@@ -183,7 +179,7 @@ def main():
                     else:
                         index_arr = sorted(range(len(neighbor_cost)), key=lambda idx: neighbor_cost[idx])
                         j = index_arr[0]
-                    M_next = copy.deepcopy(neigbor_set[j])
+                    M_next = neigbor_set[j]
                     fM_next, sm1, _ = utils.matching_cost(men_shortlists, women_shortlists, M_next)
                     fM_left, _, _ = utils.matching_cost(men_shortlists, women_shortlists, M_left)
                     if fM_next >= fM_left:
@@ -196,7 +192,7 @@ def main():
                     # for next iteration
                     M_left = copy.deepcopy(M_next)
                     if len(index_arr) == 1:
-                        neighbor_left = copy.deepcopy(neigbor_set[index_arr[0]])
+                        neighbor_left[0] = copy.deepcopy(neigbor_set[index_arr[0]])
                     else:
                         if k > len(neigbor_set):
                             neighbor_left = copy.deepcopy(neigbor_set)
@@ -241,7 +237,7 @@ def main():
                     # for next iteration
                     M_right = copy.deepcopy(M_next)
                     if len(index_arr) == 1:
-                        neighbor_right = copy.deepcopy(neigbor_set[index_arr[0]])
+                        neighbor_right[0] = copy.deepcopy(neigbor_set[index_arr[0]])
                     else:
                         if k > len(neigbor_set):
                             neighbor_right = copy.deepcopy(neigbor_set)
@@ -261,13 +257,11 @@ def main():
 
         app.terminate_slaves()
 
-        print(M_best)
+        end = time.time()
+        print(f'Found M_best {M_best} in {start - end}')
 
     else:  # Any slave
-
         MySlave().run()
-
-    print('Task completed (rank %d)' % rank)
 
 
 if __name__ == "__main__":
