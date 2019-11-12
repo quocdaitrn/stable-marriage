@@ -65,7 +65,10 @@ def shortl_bils():
     k = 1
     t = 1
     mans_per_each_process = int(n / size)
+    is_top = False
     while True:
+        if is_top:
+            break
         # -------------------search forward---------------------
         if forward:
             neigbor_set = []
@@ -83,6 +86,7 @@ def shortl_bils():
                     neigbor_set.extend(neigbor_set_tmp)
 
             print(neigbor_set)
+            comm.bcast()
             if len(neigbor_set) != 0:
                 # find the best neighbor matchings
                 neighbor_cost = []
