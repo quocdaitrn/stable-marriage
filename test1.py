@@ -164,7 +164,6 @@ def main():
                                       m,
                                       copy.deepcopy(Mt)))
                 app.run(tasks)
-                # app.terminate_slaves()
                 neigbor_set = copy.deepcopy(app.get_neigbor_set())
                 if len(neigbor_set) != 0:
                     # find the best neighbor matchings
@@ -203,14 +202,17 @@ def main():
 
             # -------------------search backward---------------------
             if backward:
-                neigbor_set = []
+                tasks = []
                 for h in range(len(neighbor_right)):
                     M_temp_woman = copy.deepcopy(neighbor_right[h])
                     for m in range(n):
-                        M_child = break_marriage_woman(women_shortlists, men_shortlists, copy.deepcopy(M_temp_woman), m,
-                                                       copy.deepcopy(M0))
-                        if len(M_child) != 0:
-                            neigbor_set.append(copy.deepcopy(M_child))
+                        tasks.append((copy.deepcopy(women_shortlists),
+                                      copy.deepcopy(men_shortlists),
+                                      copy.deepcopy(M_temp_woman),
+                                      m,
+                                      copy.deepcopy(M0)))
+                app.run(tasks)
+                neigbor_set = copy.deepcopy(app.get_neigbor_set())
                 if len(neigbor_set) != 0:
                     # find the best neighbor matchings
                     neighbor_cost = []
