@@ -4,14 +4,14 @@ from mpi_master_slave import WorkQueue
 
 from random import random, randint
 import time
-import utils
 import copy
 
+import utils
 from gale_shapley import gs_find_optimal_and_shortlist
-from operations import break_marriage_man, break_marriage_woman
+from operations import break_marriage_man
 
 
-class MyApp(object):
+class App(object):
     """
     This is my application that has a lot of work to do so it gives work to do
     to its slaves until all the work is done
@@ -25,10 +25,10 @@ class MyApp(object):
         self.neigbor_set = []
 
     def get_neigbor_set(self):
+        """
+        Get set of neighbors
+        """
         return self.neigbor_set
-
-    def clean_neigbor_set(self):
-        self.neigbor_set = []
 
     def terminate_slaves(self):
         """
@@ -53,7 +53,6 @@ class MyApp(object):
         # Keep starting slaves as long as there is work to do
         #
         while not self.work_queue.done():
-
             #
             # give more work to do to each idle slave (if any)
             #
@@ -65,6 +64,7 @@ class MyApp(object):
             for slave_return_data in self.work_queue.get_completed_work():
                 done, child, message = slave_return_data
                 if done:
+                    print('Master: slave finished is task and says "%s"' % message)
                     if (child is not None) and (len(child) != 0):
                         self.neigbor_set.append(copy.deepcopy(child))
 
@@ -72,14 +72,14 @@ class MyApp(object):
             time.sleep(0.03)
 
 
-class MySlave(Slave):
+class Worker(Slave):
     """
     A slave process extends Slave class, overrides the 'do_work' method
     and calls 'Slave.run'. The Master will do the rest
     """
 
     def __init__(self):
-        super(MySlave, self).__init__()
+        super(Worker, self).__init__()
 
     def do_work(self, data):
         rank = MPI.COMM_WORLD.Get_rank()
@@ -88,7 +88,9 @@ class MySlave(Slave):
 
         result = break_marriage_man(men_shortlists, women_shortlists, M, m, Mt)
 
-        return True, result, 'I completed my task'
+        print(f'  Slave {name} rank {rank} is executing')
+
+        return True, result, f'Slave at rank {rank} completed its task'
 
 
 def main():
@@ -101,9 +103,8 @@ def main():
     if rank == 0:  # Master
         global sm1, sm2
 
-        # define man preference list
-        men_prefenrence_lists = utils.read_file("men19viet.txt")
-        women_prefenrence_lists = utils.read_file("women19viet.txt")
+        # read input
+        men_prefenrence_lists, women_prefenrence_lists = get_preference_lists("input/men8.txt", "input/women8.txt")
 
         # man optimal and woman optimal solution
         gs_man_result = gs_find_optimal_and_shortlist(men_prefenrence_lists, women_prefenrence_lists,
@@ -118,17 +119,11 @@ def main():
         men_shortlists_t = copy.deepcopy(gs_woman_result["opposite_sex_short_lists"])
         Mt = copy.deepcopy(gs_woman_result["M"])
 
-        # merge shortlists to obtain the better shortlists
-        # the size of SMP
         n = len(men_shortlists_0)
-        men_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
-        women_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
-        for i in range(n):
-            for j in range(n):
-                if men_shortlists_0[i][j] == men_shortlists_t[i][j]:
-                    men_shortlists[i][j] = men_shortlists_0[i][j]
-                if women_shortlists_0[i][j] == women_shortlists_t[i][j]:
-                    women_shortlists[i][j] = women_shortlists_0[i][j]
+
+        # merge shortlists
+        men_shortlists, women_shortlists = merge_short_lists(men_shortlists_0, women_shortlists_0, men_shortlists_t,
+                                                             women_shortlists_t)
 
         # initialize the solution
         M_left = copy.deepcopy(M0)
@@ -149,8 +144,9 @@ def main():
         neighbor_left = [copy.deepcopy(M0)]
         neighbor_right = [copy.deepcopy(Mt)]
         k = 1
-        t = 1
-        app = MyApp(slaves=range(1, size))
+
+        app = App(slaves=range(1, size))
+
         while True:
             # -------------------search forward---------------------
             if forward:
@@ -255,15 +251,36 @@ def main():
                 else:
                     break
 
-            t = t + 1
-
         app.terminate_slaves()
-
+        solution_normalize = [x + 1 for x in M_best]
         end = time.time()
-        print(f'Found M_best {M_best} in {start - end}')
+        print(f'\n\nFound solution: {solution_normalize} in {end - start}\n\n')
 
     else:  # Any slave
-        MySlave().run()
+        Worker().run()
+
+    print(f'Task completed (rank {rank})')
+
+
+def get_preference_lists(men_input: str, women_input: str):
+    men_prefenrence_lists = utils.read_file(men_input)
+    women_prefenrence_lists = utils.read_file(women_input)
+
+    return men_prefenrence_lists, women_prefenrence_lists
+
+
+def merge_short_lists(men_shortlists_0, women_shortlists_0, men_shortlists_t, women_shortlists_t):
+    n = len(men_shortlists_0)
+    men_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
+    women_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if men_shortlists_0[i][j] == men_shortlists_t[i][j]:
+                men_shortlists[i][j] = men_shortlists_0[i][j]
+            if women_shortlists_0[i][j] == women_shortlists_t[i][j]:
+                women_shortlists[i][j] = women_shortlists_0[i][j]
+
+    return men_shortlists, women_shortlists
 
 
 if __name__ == "__main__":

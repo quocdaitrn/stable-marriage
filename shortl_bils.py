@@ -7,14 +7,11 @@ from gale_shapley import gs_find_optimal_and_shortlist
 from operations import break_marriage_man, break_marriage_woman
 
 
-def shortl_bils():
-    start = time.time()
-
+def shortl_bils() -> list:
     global sm1, sm2
 
-    # define man preference list
-    men_prefenrence_lists = utils.read_file("men19viet.txt")
-    women_prefenrence_lists = utils.read_file("women19viet.txt")
+    # read input
+    men_prefenrence_lists, women_prefenrence_lists = get_preference_lists("input/men8.txt", "input/women8.txt")
 
     # man optimal and woman optimal solution
     gs_man_result = gs_find_optimal_and_shortlist(men_prefenrence_lists, women_prefenrence_lists, is_men_oriented=True)
@@ -22,23 +19,15 @@ def shortl_bils():
     women_shortlists_0 = copy.deepcopy(gs_man_result["opposite_sex_short_lists"])
     M0 = copy.deepcopy(gs_man_result["M"])
 
-    gs_woman_result = gs_find_optimal_and_shortlist(women_prefenrence_lists, men_prefenrence_lists,
-                                                    is_men_oriented=False)
+    gs_woman_result = gs_find_optimal_and_shortlist(women_prefenrence_lists, men_prefenrence_lists, is_men_oriented=False)
     women_shortlists_t = copy.deepcopy(gs_woman_result["short_lists"])
     men_shortlists_t = copy.deepcopy(gs_woman_result["opposite_sex_short_lists"])
     Mt = copy.deepcopy(gs_woman_result["M"])
 
-    # merge shortlists to obtain the better shortlists
-    # the size of SMP
     n = len(men_shortlists_0)
-    men_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
-    women_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
-    for i in range(n):
-        for j in range(n):
-            if men_shortlists_0[i][j] == men_shortlists_t[i][j]:
-                men_shortlists[i][j] = men_shortlists_0[i][j]
-            if women_shortlists_0[i][j] == women_shortlists_t[i][j]:
-                women_shortlists[i][j] = women_shortlists_0[i][j]
+
+    # merge shortlists
+    men_shortlists, women_shortlists = merge_short_lists(men_shortlists_0, women_shortlists_0, men_shortlists_t, women_shortlists_t)
 
     # initialize the solution
     M_left = copy.deepcopy(M0)
@@ -59,7 +48,7 @@ def shortl_bils():
     neighbor_left = [copy.deepcopy(M0)]
     neighbor_right = [copy.deepcopy(Mt)]
     k = 1
-    t = 1
+
     while True:
         # -------------------search forward---------------------
         if forward:
@@ -158,11 +147,39 @@ def shortl_bils():
             else:
                 break
 
-        t = t + 1
+    return M_best
 
+
+def get_preference_lists(men_input: str, women_input: str):
+    men_prefenrence_lists = utils.read_file(men_input)
+    women_prefenrence_lists = utils.read_file(women_input)
+
+    return men_prefenrence_lists, women_prefenrence_lists
+
+
+def merge_short_lists(men_shortlists_0, women_shortlists_0, men_shortlists_t, women_shortlists_t):
+    n = len(men_shortlists_0)
+    men_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
+    women_shortlists = [[-1 for _ in range(n)] for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if men_shortlists_0[i][j] == men_shortlists_t[i][j]:
+                men_shortlists[i][j] = men_shortlists_0[i][j]
+            if women_shortlists_0[i][j] == women_shortlists_t[i][j]:
+                women_shortlists[i][j] = women_shortlists_0[i][j]
+
+    return men_shortlists, women_shortlists
+
+
+def main():
+    start = time.time()
+    solution = shortl_bils()
+    solution_normalize = [x + 1 for x in solution]
     end = time.time()
-    print(f'Found M_best: {M_best} in {start - end}')
+
+    print(f'Found solution:{solution_normalize} in {end - start}')
 
 
 if __name__ == "__main__":
-    shortl_bils()
+    main()
+

@@ -1,6 +1,5 @@
 import utils
 import copy
-from numpy import array
 
 
 def gs_find_optimal_and_shortlist(preference_lists: list, opposite_sex_preference_lists: list, is_men_oriented: bool) -> dict:
@@ -73,8 +72,8 @@ def gs_find_optimal_and_shortlist(preference_lists: list, opposite_sex_preferenc
 
             rank_w[mi] = rank_w[mi] + 1
 
-    short_lists_normalize = [[x + 1 for x in row] for row in short_lists]
-    opposite_sex_short_lists_normalize = [[x + 1 for x in row] for row in opposite_sex_short_lists]
+    # short_lists_normalize = [[x + 1 for x in row] for row in short_lists]
+    # opposite_sex_short_lists_normalize = [[x + 1 for x in row] for row in opposite_sex_short_lists]
 
     if is_men_oriented:
         # M_normalize = [x + 1 for x in M]
@@ -87,7 +86,7 @@ def gs_find_optimal_and_shortlist(preference_lists: list, opposite_sex_preferenc
             "M": M_normalize}
 
 
-# result_man = gs_find_optimal_and_shortlist(utils.read_file("men19viet.txt"), utils.read_file("women19viet.txt"), True)
+# result_man = gs_find_optimal_and_shortlist(utils.read_file("men8.txt"), utils.read_file("women8.txt"), True)
 #
 #
 # print(f'opposite_sex_short_lists: {array(result_man["opposite_sex_short_lists"])}')
@@ -100,7 +99,7 @@ def gs_find_optimal_and_shortlist(preference_lists: list, opposite_sex_preferenc
 # print(f'test:{result_man["M"]}')
 #
 #
-# result_woman = gs_find_optimal_and_shortlist(utils.read_file("women19viet.txt"), utils.read_file("men19viet.txt"), False)
+# result_woman = gs_find_optimal_and_shortlist(utils.read_file("women8.txt"), utils.read_file("men8.txt"), False)
 #
 # print(f'opposite_sex_short_lists: {array(result_woman["opposite_sex_short_lists"])}')
 # print(f'short_lists: {array(result_woman["short_lists"])}')

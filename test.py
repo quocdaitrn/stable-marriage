@@ -17,8 +17,8 @@ def shortl_bils():
     global sm1, sm2
 
     # define man preference list
-    men_prefenrence_lists = utils.read_file("men19viet.txt")
-    women_prefenrence_lists = utils.read_file("women19viet.txt")
+    men_prefenrence_lists = utils.read_file("men8.txt")
+    women_prefenrence_lists = utils.read_file("women8.txt")
 
     # man optimal and woman optimal solution
     gs_man_result = gs_find_optimal_and_shortlist(men_prefenrence_lists, women_prefenrence_lists, is_men_oriented=True)
